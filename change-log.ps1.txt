@@ -35,3 +35,7 @@ foreach ($pr in $pullRequestsResponse.value) {
         $changelogContent += "- Work Item #[$workItemId] [Link]($workItemLink)`n"
     }
 }
+
+# Output changelog to file
+Set-Content -Path $outputFile -Value $changelogContent
+Write-Host "Changelog written to $outputFile"
