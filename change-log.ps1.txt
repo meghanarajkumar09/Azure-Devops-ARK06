@@ -1,3 +1,10 @@
+param (
+    [string]$organization,
+    [string]$project,
+    [string]$repositoryId,
+    [string]$outputFile
+)
+
 # Personal Access Token (PAT) from environment variable
 $pat = $env:PAT
 $baseUri = "https://dev.azure.com/$organization/$project/_apis/git/repositories/$repositoryId"
