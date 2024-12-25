@@ -1,0 +1,30 @@
+# Personal Access Token (PAT) from environment variable
+$pat = $env:PAT
+$baseUri = "https://dev.azure.com/$organization/$project/_apis/git/repositories/$repositoryId"
+$headers = @{
+    Authorization = "Basic " + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$pat"))
+}
+
+# Current date for the changelog
+$currentDate = (Get-Date).ToString("yyyy-MM-dd")
+$changelogContent = "# Changelog`n## [$currentDate] - Release`n"
+
+# Fetch Pull Requests
+$pullRequestsUri = "$baseUri/pullrequests?api-version=6.0"
+$pullRequestsResponse = Invoke-RestMethod -Uri $pullRequestsUri -Headers $headers
+
+foreach ($pr in $pullRequestsResponse.value) {
+    $prTitle = $pr.title
+    $prId = $pr.pullRequestId
+    $changelogContent += "### PR #[$prId]: $prTitle`n"
+
+    # Fetch linked work items for the PR
+    $workItemsUri = "$baseUri/pullrequests/$prId/workitems?api-version=6.0"
+    $workItemsResponse = Invoke-RestMethod -Uri $workItemsUri -Headers $headers
+
+    foreach ($workItem in $workItemsResponse.value) {
+        $workItemId = $workItem.id
+        $workItemLink = "https://dev.azure.com/$organization/$project/_workitems/edit/$workItemId"
+        $changelogContent += "- Work Item #[$workItemId] [Link]($workItemLink)`n"
+    }
+}
