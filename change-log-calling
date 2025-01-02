@@ -1,0 +1,36 @@
+variables:
+  organization: 'martinbrowerdeveops'
+  project: 'GLOBAL_PDA'
+  repositoryId: 'WEB-APP'
+  outputFile: 'changelog.md'
+
+    - script: |
+      echo "Generating MD5 Checksum for Build Artifacts"
+      cd $(Build.ArtifactStagingDirectory)/
+      for file in *.zip; do
+          md5sum "$file" >> "$file.md5"
+      done
+    displayName: 'Generate MD5 Checksum'
+
+  - task: PowerShell@2
+    inputs:
+      targetType: 'filePath'
+      filePath: '$(Build.SourcesDirectory)/generate-changelog.ps1'
+      arguments: "-organization $(organization) -project $(project) -repositoryId $(repositoryId) -outputFile $(outputFile)"
+      pwsh: true
+    env:
+      PAT: $(System.AccessToken)
+    displayName: 'Generate Changelog'
+
+ steps:
+  - checkout: self
+    persistCredentials: true
+    
+    - script: |
+      echo "Committing and Pushing Changelog"
+      git config user.name "RajKumar"
+      git config user.email "RAngangla.C@martin-brower.com"
+      git add changelog.md
+      git commit -m "update changelog [skip ci]"
+      git push origin HEAD:$(Build.SourceBranchName)
+    displayName: 'Commit and Push Changelog'
