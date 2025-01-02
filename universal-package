@@ -1,0 +1,10 @@
+- task: UniversalPackages@0
+  inputs:
+    command: 'publish'
+    publishDirectory: '$(Build.ArtifactStagingDirectory)'
+    feedsToUsePublish: 'internal'
+    vstsFeedPublish: 'd2705e06-d765-4cc7-bc8e-92fdd61a9d6b/fbde3327-33d4-4f15-b7f1-a813bd5548b6'
+    vstsFeedPackagePublish: 'webapp'
+    versionOption: 'custom'
+    versionPublish: '1.$(Build.BuildNumber)'
+  displayName: 'Publish Universal Package'
