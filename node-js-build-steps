@@ -1,0 +1,54 @@
+parameters:
+  - name: environment
+    displayName: 'Build Environment'
+    type: string
+    values:
+      - 'prod'
+      - 'prod-na'
+      - 'prod-uk'
+      - 'uat-na'
+      - 'uat-uk'
+      - 'dev-na'
+      - 'dev-uk'
+
+- task: NodeTool@0
+  inputs:
+    versionSpec: '10.x'
+  displayName: 'Install Node.js'
+
+- script: |
+    echo "Cleaning up previous build output"
+    rm -rf $(Agent.BuildDirectory)/s/dist/*
+  displayName: 'Clean Previous Build Artifacts'
+
+- script: |
+    echo "Installing dependencies"
+    npm install -g @angular/cli@7.0.4
+    npm install
+  displayName: 'Install Dependencies'
+
+- script: |
+    echo "Building project for environment: ${{ parameters.environment }}"
+    ng build --configuration=${{ parameters.environment }} --prod
+  displayName: 'Build Angular Project'
+
+- script: |
+    echo "Verifying build output directory"
+    ls -al $(Agent.BuildDirectory)/s/dist/
+  displayName: 'List Build Output Directory'
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Agent.BuildDirectory)/s/dist'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/dist.zip'
+    replaceExistingArchive: true
+  displayName: 'Archive Build Artifacts'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathToPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'webapp'
+    publishLocation: 'Container'
+  displayName: 'Publish Artifacts'
