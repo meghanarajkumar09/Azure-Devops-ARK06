@@ -1,0 +1,17 @@
+parameters:
+  - name: environment
+    displayName: 'Build Environment'
+    type: string
+    values:
+      - 'prod'
+      - 'prod-na'
+      - 'prod-uk'
+      - 'uat-na'
+      - 'uat-uk'
+      - 'dev-na'
+      - 'dev-uk'
+
+- script: |
+    echo "Building project for environment: ${{ parameters.environment }}"
+    ng build --configuration=${{ parameters.environment }} --prod
+  displayName: 'Build Angular Project'
